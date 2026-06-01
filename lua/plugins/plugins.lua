@@ -174,9 +174,9 @@ return {
 			local servers = {
 				-- csharp_ls = {},
 
-				roslyn = {},
-				graphql = {},
-				powershell_es = {},
+				--roslyn = {},
+				--graphql = {},
+				--powershell_es = {},
 				html = {},
 				lua_ls = {
 					settings = {
@@ -292,24 +292,23 @@ return {
 			end
 		end,
 	},
-	{ -- Highlight, edit, and navigate code
-		"nvim-treesitter/nvim-treesitter",
-		build = ":TSUpdate",
-		branch = "master",
-		main = "nvim-treesitter.configs",
-		opts = {
-			auto_install = true,
-			highlight = {
-				enable = true,
-			},
-			indent = {
-				enable = true,
-			},
-			ensure_installed = {
-				"html",
-				"razor",
-				"c_sharp",
-			},
-		},
-	},
+    {
+        "nvim-treesitter/nvim-treesitter",
+        build = ":TSUpdate",
+        branch = "main",
+        config = function()
+            require("nvim-treesitter").setup({
+                    auto_install = true,
+                    highlight = {
+                        enable = true,
+                    },
+                    indent = {
+                        enable = true,
+                    },
+                    ensure_installed = {
+                    "html"
+                    }
+                })
+        end,
+    },
 }

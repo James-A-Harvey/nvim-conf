@@ -4,18 +4,19 @@ return {
 		event = "VeryLazy",
 		version = false,
 		build = vim.fn.has("win32") ~= 0
-			and "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false"
+				and "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false"
 			or "make",
 		opts = {
-			provider = "claude",
-			providers = {
-				claude = {
-					endpoint = "https://api.anthropic.com",
-					model = "claude-sonnet-4-20250514",
-					timeout = 30000, -- Timeout in milliseconds
-					extra_request_body = {
-						temperature = 0.75,
-						max_tokens = 20480,
+			provider = "cursor",
+			mode = "agentic",
+			acp_providers = {
+				cursor = {
+					command = os.getenv("HOME") .. "/.local/bin/agent",
+					args = { "acp" },
+					auth_method = "cursor_login",
+					env = {
+						HOME = os.getenv("HOME"),
+						PATH = os.getenv("PATH"),
 					},
 				},
 			},
