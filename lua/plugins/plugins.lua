@@ -169,12 +169,11 @@ return {
 				},
 			})
 
-			-- LSP servers and clients are able to communicate to each other what features they support.
-			local capabilities = require("blink.cmp").get_lsp_capabilities()
+			-- LSP server overrides (Neovim 0.11+). blink.cmp sets global capabilities via vim.lsp.config('*', ...).
 			local servers = {
 				-- csharp_ls = {},
 
-				--roslyn = {},
+				roslyn = {},
 				--graphql = {},
 				--powershell_es = {},
 				html = {},
@@ -187,26 +186,28 @@ return {
 						},
 					},
 				},
+				cucumber_language_server = {
+					settings = {
+						cucumber = {
+							features = { "cypress/**/*.feature" },
+							glue = { "cypress/support/step_definitions/**/*.ts" },
+						},
+					},
+				},
 			}
-			local ensure_installed = vim.tbl_keys(servers or {})
+			for server_name, server_config in pairs(servers) do
+				vim.lsp.config(server_name, server_config)
+			end
+
+			local ensure_installed = vim.tbl_keys(servers)
 			vim.list_extend(ensure_installed, {
 				"stylua",
 			})
 			require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
+			-- Auto-enables Mason-installed servers via vim.lsp.enable(); picks up vim.lsp.config() above.
 			require("mason-lspconfig").setup({
-				ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
-				automatic_installation = false,
-				handlers = {
-					function(server_name)
-						local server = servers[server_name] or {}
-						-- This handles overriding only values explicitly passed
-						-- by the server configuration above. Useful when disabling
-						-- certain features of an LSP (for example, turning off formatting for ts_ls)
-						server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-						require("lspconfig")[server_name].setup(server)
-					end,
-				},
+				ensure_installed = {},
 			})
 		end,
 	},
@@ -225,7 +226,7 @@ return {
 			"nvim-lua/plenary.nvim",
 			"antoinemadec/FixCursorHold.nvim",
 			"nvim-treesitter/nvim-treesitter",
-			"Issafalcon/neotest-dotnet",
+			"marilari88/neotest-vitest",
 		},
 		keys = {
 			{
@@ -260,7 +261,13 @@ return {
 		config = function()
 			require("neotest").setup({
 				adapters = {
-					require("neotest-dotnet"),
+					require("neotest-vitest")({
+						vitestCommand = "npx vitest run",
+						-- Filter directories when searching for test files. Useful in large projects (see Filter directories notes).
+						filter_dir = function(name, rel_path, root)
+							return name ~= "node_modules"
+						end,
+					}),
 				},
 			})
 		end,
@@ -292,23 +299,23 @@ return {
 			end
 		end,
 	},
-    {
-        "nvim-treesitter/nvim-treesitter",
-        build = ":TSUpdate",
-        branch = "main",
-        config = function()
-            require("nvim-treesitter").setup({
-                    auto_install = true,
-                    highlight = {
-                        enable = true,
-                    },
-                    indent = {
-                        enable = true,
-                    },
-                    ensure_installed = {
-                    "html"
-                    }
-                })
-        end,
-    },
+	{
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TSUpdate",
+		branch = "main",
+		config = function()
+			require("nvim-treesitter").setup({
+				auto_install = true,
+				highlight = {
+					enable = true,
+				},
+				indent = {
+					enable = true,
+				},
+				ensure_installed = {
+					"html",
+				},
+			})
+		end,
+	},
 }

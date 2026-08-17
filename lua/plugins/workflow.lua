@@ -189,4 +189,9 @@ return {
 		"dimtion/guttermarks.nvim",
 		event = { "BufReadPost", "BufNewFile", "BufWritePre", "FileType" },
 	},
+	{
+		"ravibrock/spellwarn.nvim",
+		event = "VeryLazy",
+		config = true,
+	},
 }
